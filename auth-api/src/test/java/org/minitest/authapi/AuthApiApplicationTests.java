@@ -10,4 +10,5 @@ class AuthApiApplicationTests {
 	void contextLoads() {
 	}
 
+
 }
