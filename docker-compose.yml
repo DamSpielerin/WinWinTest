@@ -1,10 +1,12 @@
 services:
   postgres:
+    networks:
+      - db_network
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-appdb}
+      POSTGRES_USER: ${DB_USER:-appuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-apppass}
     ports:
       - "5432:5432"
     volumes:
@@ -16,23 +18,28 @@ services:
       retries: 10
 
   data-api:
+    networks:
+      - app_network
     build:
       context: ./data-api
     environment:
-      INTERNAL_TOKEN: ${INTERNAL_TOKEN}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
     ports:
       - "8081:8081"
 
   auth-api:
+    networks:
+      - app_network
+      - db_network
     build:
       context: ./auth-api
     environment:
-      POSTGRES_URL: ${POSTGRES_URL}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      INTERNAL_TOKEN: ${INTERNAL_TOKEN}
-      DATA_API_URL: http://data-api:8081
+      POSTGRES_URL: ${POSTGRES_URL:-jdbc:postgresql://postgres:5432/appdb}
+      POSTGRES_USER: ${DB_USER:-appuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-apppass}
+      JWT_SECRET: ${JWT_SECRET:-change-me-change-me-change-me-change-me}
+      INTERNAL_TOKEN: ${INTERNAL_TOKEN:-dev-internal-token}
+      DATA_API_URL: ${DATA_API_URL:-http://data-api:8081}
     ports:
       - "8080:8080"
     depends_on:
@@ -43,3 +50,9 @@ services:
 
 volumes:
   postgres-data:
+
+networks:
+  app_network:
+    driver: bridge
+  db_network:
+    driver: bridge
