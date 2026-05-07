@@ -79,6 +79,7 @@ Expected: `{"result":"OLLEH"}`.
 ```postgresql
 select user_id, input_text, output_text, created_at from processing_log order by created_at desc;
 ```
+![img.png](img.png)
 
 ## Configuration
 
